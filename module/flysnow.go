@@ -100,10 +100,10 @@ func (s *Flysnow) getTitleURL(entry string) []string {
 		}
 
 		// 提取分页页码
-		if 0 == cnt {
+		if 0 == cnt || 0 == idx%5 {
 			doc.Find("div.content_container nav.page-navigator a.page-number").Each(func(i int, s *goquery.Selection) {
 				var page, err = strconv.ParseInt(s.Text(), 10, 64)
-				if nil == err && page >= cnt {
+				if nil == err && page > cnt {
 					cnt = page
 				}
 			})

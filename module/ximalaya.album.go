@@ -104,11 +104,11 @@ func (s *XimalayaAlbum) getItemID(entry string) ([][]string, error) {
 		doc, err = s.client.GetDoc(url, nil)
 		if nil == err && nil != doc {
 			// 提取分页总数
-			if 0 == cnt {
+			if 0 == cnt || 0 == idx%5 {
 				doc.Find("div#mainbox.mainbox div.mainbox_wrapper div.pagingBar a.pagingBar_page").Each(func(i int, s *goquery.Selection) {
 					var p = s.Text()
 					if reg.MatchString(p) {
-						if num, err := strconv.ParseInt(p, 10, 64); nil == err {
+						if num, err := strconv.ParseInt(p, 10, 64); nil == err && num > cnt {
 							cnt = num
 						}
 					}
