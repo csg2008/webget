@@ -2,6 +2,7 @@ package module
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"os"
 	"strconv"
@@ -106,17 +107,24 @@ func (s *XLFM) getItemID(entry string) ([][]string, error) {
 	for {
 		var cur = entry + "?page=" + strconv.FormatInt(idx, 10) + "&p=" + strconv.FormatInt(idx, 10)
 
-		idx++
+		fmt.Println("get resource list:", cur)
 		doc, err = s.client.GetDoc(cur, nil)
-		if nil == err && nil != doc {
+		if nil == err && nil != doc && doc.Length() > 0 {
 			// 提取提取声音标题与ID
+			var cnt = 0
 			doc.Find("li a.broadcast_title").Each(func(i int, s *goquery.Selection) {
 				title := strings.Trim(s.Text(), "\n ")
 				href, ok := s.Attr("href")
 				if ok && "" != href {
+					cnt++
 					ret = append(ret, []string{title, strings.Trim(href, "/")})
 				}
 			})
+
+			idx++
+			if 0 == cnt {
+				break
+			}
 		} else {
 			break
 		}

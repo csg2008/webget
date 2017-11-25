@@ -129,11 +129,15 @@ func (c *Client) GetByte(url string, payload *ClientPayload) ([]byte, *http.Resp
 // GetDoc 从 URL 创建 goquery DOM 对象
 func (c *Client) GetDoc(url string, payload *ClientPayload) (*goquery.Document, error) {
 	var resp, err = c.Read(url, payload)
-	if nil == err {
-		return goquery.NewDocumentFromReader(resp.Body)
+	if nil != err {
+		return nil, err
 	}
 
-	return nil, err
+	if 0 == resp.ContentLength {
+		return nil, errors.New("remote return is empty")
+	}
+
+	return goquery.NewDocumentFromResponse(resp)
 }
 
 // GetCodec 从 URL 创建反序列化对象
