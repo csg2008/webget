@@ -35,6 +35,7 @@ func main() {
 		"netease_stock":  module.NewNeteaseStock,
 		"flysnow":        module.NewFlysnow,
 		"ximalaya_album": module.NewXimalayaAlbum,
+		"xlfm":           module.NewXLFM,
 	}
 
 	flag.Usage = func() {

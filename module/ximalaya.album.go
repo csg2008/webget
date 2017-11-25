@@ -1,7 +1,6 @@
 package module
 
 import (
-	"encoding/json"
 	"errors"
 	"os"
 	"regexp"
@@ -57,7 +56,7 @@ func (s *XimalayaAlbum) Do(tryModel bool, entry string, fp *os.File) error {
 	if nil == err && len(trackID) > 0 {
 		for _, item := range trackID {
 			if url, err = s.getItemURL(item[1]); nil == err && "" != url {
-				s.client.Download(url, item[0]+s.client.GetURLExt(url))
+				s.client.Download(url, item[0], true)
 			}
 		}
 	}
@@ -67,18 +66,16 @@ func (s *XimalayaAlbum) Do(tryModel bool, entry string, fp *os.File) error {
 
 // getItemURL 获取声音 ID 对应的 URL
 func (s *XimalayaAlbum) getItemURL(id string) (string, error) {
+	var out = make(map[string]interface{})
 	var url = "http://www.ximalaya.com/tracks/" + id + ".json"
 
-	var resp, code, err = s.client.GetByte(url, nil)
-	if nil == err && nil != resp && 200 == code {
-		var out = make(map[string]interface{})
-		if err = json.Unmarshal(resp, &out); nil == err {
-			if uri, ok := out["play_path"].(string); ok {
-				return uri, nil
-			}
-
-			return "", errors.New("声音 " + url + " 的下载网址为空，是收费内容？")
+	var err = s.client.GetCodec(url, nil, "json", &out)
+	if nil == err && nil != out {
+		if uri, ok := out["play_path"].(string); ok && "" != uri {
+			return uri, nil
 		}
+
+		return "", errors.New("声音 " + url + " 的下载网址为空，是收费内容？")
 	}
 
 	return "", err

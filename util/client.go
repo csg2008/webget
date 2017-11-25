@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -45,6 +46,11 @@ func (c *Client) Read(url string, payload *ClientPayload) (*http.Response, error
 	if nil == payload {
 		payload = &ClientPayload{
 			Method: "GET",
+		}
+	}
+	if nil == payload.Header {
+		payload.Header = &http.Header{
+			"User-Agent": []string{"User-Agent:Mozilla/5.0(Macintosh;U;IntelMacOSX10_6_8;en-us)AppleWebKit/534.50(KHTML,likeGecko)Version/5.1Safari/534.50"},
 		}
 	}
 
@@ -104,20 +110,20 @@ func (c *Client) Read(url string, payload *ClientPayload) (*http.Response, error
 }
 
 // GetByte 从 URL 读取字节内容及状态码
-func (c *Client) GetByte(url string, payload *ClientPayload) ([]byte, int, error) {
+func (c *Client) GetByte(url string, payload *ClientPayload) ([]byte, *http.Response, error) {
 	var resp, err = c.Read(url, payload)
 	if nil == err {
 		var ret []byte
 		ret, err = ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
 		if err != nil {
-			return nil, 0, err
+			return nil, resp, err
 		}
 
-		return ret, resp.StatusCode, nil
+		return ret, resp, nil
 	}
 
-	return nil, 0, err
+	return nil, nil, err
 }
 
 // GetDoc 从 URL 创建 goquery DOM 对象
@@ -130,25 +136,47 @@ func (c *Client) GetDoc(url string, payload *ClientPayload) (*goquery.Document, 
 	return nil, err
 }
 
-// Download 下载文件
-func (c *Client) Download(url string, filename string) error {
-	filename = SafeFileName(filename)
-	var output, err = os.Create(filename)
-	if err != nil {
-		return err
+// GetCodec 从 URL 创建反序列化对象
+func (c *Client) GetCodec(url string, payload *ClientPayload, codec string, out interface{}) error {
+	var err error
+	var data []byte
+	var resp *http.Response
+	if data, resp, err = c.GetByte(url, nil); nil == err && 200 == resp.StatusCode {
+		switch codec {
+		case "json":
+			err = json.Unmarshal(data, out)
+		default:
+			err = errors.New("unknown codec")
+		}
 	}
 
-	defer func() {
-		output.Close()
-		if nil != err {
-			os.Remove(filename)
-		}
-	}()
+	return err
+}
 
-	var code int
-	var resp []byte
-	if resp, code, err = c.GetByte(url, nil); nil == err && 200 == code {
-		_, err = output.Write(resp)
+// Download 下载文件
+func (c *Client) Download(url string, filename string, auto bool) error {
+	var err error
+	var data []byte
+	var resp *http.Response
+	if data, resp, err = c.GetByte(url, nil); nil == err && 200 == resp.StatusCode {
+		if auto && "" == c.GetURLExt(filename) {
+			filename = filename + c.GetURLExt(resp.Request.URL.String())
+		}
+
+		filename = SafeFileName(filename)
+		var output, err = os.Create(filename)
+		if err != nil {
+			return err
+		}
+
+		defer func() {
+			output.Close()
+			if nil != err {
+				os.Remove(filename)
+			}
+		}()
+
+		_, err = output.Write(data)
 	}
 
 	return err
@@ -158,10 +186,7 @@ func (c *Client) Download(url string, filename string) error {
 func (c *Client) GetURLExt(url string) string {
 	var ext string
 
-	if pos := strings.Index(url, "?"); pos > 0 {
-		url = url[pos:]
-	}
-
+	url = c.GetURLFilename(url)
 	if pos := strings.LastIndex(url, "."); pos > 0 {
 		ext = url[pos:]
 	}
