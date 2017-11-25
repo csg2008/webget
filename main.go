@@ -36,6 +36,7 @@ func main() {
 		"flysnow":        module.NewFlysnow,
 		"ximalaya_album": module.NewXimalayaAlbum,
 		"xlfm":           module.NewXLFM,
+		"lzfm":           module.NewLZFM,
 	}
 
 	flag.Usage = func() {
