@@ -52,11 +52,23 @@ func (s *XimalayaAlbum) Do(tryModel bool, entry string, fp *os.File) error {
 	}
 
 	var url string
+	var flag bool
+	var files = util.GetDirFiles("./", true)
 	var trackID, err = s.getItemID(entry)
 	if nil == err && len(trackID) > 0 {
 		for _, item := range trackID {
 			if url, err = s.getItemURL(item[1]); nil == err && "" != url {
-				s.client.Download(url, item[0], true)
+				flag = false
+
+				for _, file := range files {
+					if file == item[0] {
+						flag = true
+					}
+				}
+
+				if !flag {
+					s.client.Download(url, item[0], true)
+				}
 			}
 		}
 	}
@@ -122,7 +134,7 @@ func (s *XimalayaAlbum) getItemID(entry string) ([][]string, error) {
 				if ok && "" != href {
 					tmp = strings.SplitN(href, "/", 5)
 					if "sound" == tmp[2] {
-						ret = append(ret, []string{title, tmp[3]})
+						ret = append(ret, []string{strings.Trim(title, " "), tmp[3]})
 					}
 				}
 			})

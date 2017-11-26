@@ -31,12 +31,12 @@ func main() {
 		"version": buildVersion,
 	}
 	var provider = map[string]schema.WorkerHandle{
-		"cnblogs":        module.NewCnblogs,
-		"netease_stock":  module.NewNeteaseStock,
-		"flysnow":        module.NewFlysnow,
-		"ximalaya_album": module.NewXimalayaAlbum,
-		"xlfm":           module.NewXLFM,
-		"lzfm":           module.NewLZFM,
+		"cnblogs":       module.NewCnblogs,
+		"netease_stock": module.NewNeteaseStock,
+		"flysnow":       module.NewFlysnow,
+		"xmly":          module.NewXimalayaAlbum,
+		"xlfm":          module.NewXLFM,
+		"lzfm":          module.NewLZFM,
 	}
 
 	flag.Usage = func() {

@@ -1,13 +1,8 @@
 package util
 
 import (
-	"bytes"
 	"io/ioutil"
 	"strings"
-
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/encoding/traditionalchinese"
-	"golang.org/x/text/transform"
 )
 
 // SafeFileName replace all illegal chars to a underline char
@@ -19,35 +14,29 @@ func SafeFileName(fileName string) string {
 		return r
 	}, fileName)
 }
-func utf8ToGBK(text string) (string, error) {
-	dst := make([]byte, len(text)*2)
-	tr := simplifiedchinese.GB18030.NewEncoder()
-	nDst, _, err := tr.Transform(dst, []byte(text), true)
-	if err != nil {
-		return text, err
-	}
-	return string(dst[:nDst]), nil
-}
 
-// Decode decode byte code
-func Decode(s []byte) ([]byte, error) {
-	I := bytes.NewReader(s)
-	O := transform.NewReader(I, traditionalchinese.Big5.NewDecoder())
-	d, e := ioutil.ReadAll(O)
-	if e != nil {
-		return nil, e
-	}
+// GetDirFiles 获取指定文件夹文件列表
+func GetDirFiles(dirPath string, stripExt bool) []string {
+	var ret []string
 
-	return d, nil
-}
-
-func DecodeToGBK(text string) (string, error) {
-	dst := make([]byte, len(text)*2)
-	tr := simplifiedchinese.GB18030.NewDecoder()
-	nDst, _, err := tr.Transform(dst, []byte(text), true)
-	if err != nil {
-		return text, err
+	if files, err := ioutil.ReadDir(dirPath); nil == err && nil != files {
+		ret = make([]string, 0, len(files))
+		for _, v := range files {
+			if !v.IsDir() {
+				if stripExt {
+					var tmp = v.Name()
+					var idx = strings.LastIndexByte(v.Name(), '.')
+					if idx > 0 {
+						ret = append(ret, strings.Trim(tmp[0:idx], " "))
+					} else {
+						ret = append(ret, v.Name())
+					}
+				} else {
+					ret = append(ret, v.Name())
+				}
+			}
+		}
 	}
 
-	return string(dst[:nDst]), nil
+	return ret
 }
