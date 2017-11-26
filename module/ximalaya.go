@@ -57,16 +57,16 @@ func (s *XimalayaAlbum) Do(tryModel bool, entry string, fp *os.File) error {
 	var trackID, err = s.getItemID(entry)
 	if nil == err && len(trackID) > 0 {
 		for _, item := range trackID {
-			if url, err = s.getItemURL(item[1]); nil == err && "" != url {
-				flag = false
+			flag = false
 
-				for _, file := range files {
-					if file == item[0] {
-						flag = true
-					}
+			for _, file := range files {
+				if file == item[0] {
+					flag = true
 				}
+			}
 
-				if !flag {
+			if !flag {
+				if url, err = s.getItemURL(item[1]); nil == err && "" != url {
 					s.client.Download(url, item[0], true)
 				}
 			}
