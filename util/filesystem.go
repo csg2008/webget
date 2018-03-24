@@ -164,9 +164,9 @@ func FileGetContents(filename string) (data []byte, e error) {
 func FilePutContents(filename string, content []byte, append bool) error {
 	var flag int
 	if append {
-		flag = os.O_WRONLY | os.O_APPEND | os.O_CREATE
+		flag = os.O_WRONLY | os.O_CREATE | os.O_APPEND
 	} else {
-		flag = os.O_WRONLY | os.O_CREATE
+		flag = os.O_WRONLY | os.O_CREATE | os.O_TRUNC
 	}
 
 	fp, err := os.OpenFile(filename, flag, os.ModePerm)

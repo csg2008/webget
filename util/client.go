@@ -145,7 +145,7 @@ func (c *Client) GetCodec(url string, payload *ClientPayload, codec string, out 
 	var err error
 	var data []byte
 	var resp *http.Response
-	if data, resp, err = c.GetByte(url, nil); nil == err && 200 == resp.StatusCode {
+	if data, resp, err = c.GetByte(url, payload); nil == err && 200 == resp.StatusCode {
 		switch codec {
 		case "json":
 			err = json.Unmarshal(data, out)
