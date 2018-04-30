@@ -25,6 +25,11 @@ type Flysnow struct {
 	client *util.Client
 }
 
+// EnableIncrement 是否支持增量下载
+func (s *Flysnow) EnableIncrement() bool {
+	return true
+}
+
 // Help 显示抓取器帮助
 func (s *Flysnow) Help(detail bool) string {
 	var tip string

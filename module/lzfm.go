@@ -24,6 +24,11 @@ type LZFM struct {
 	client *util.Client
 }
 
+// EnableIncrement 是否支持增量下载
+func (s *LZFM) EnableIncrement() bool {
+	return true
+}
+
 // Help 显示抓取器帮助
 func (s *LZFM) Help(detail bool) string {
 	var tip string

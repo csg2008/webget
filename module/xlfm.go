@@ -24,6 +24,11 @@ type XLFM struct {
 	client *util.Client
 }
 
+// EnableIncrement 是否支持增量下载
+func (s *XLFM) EnableIncrement() bool {
+	return true
+}
+
 // Help 显示抓取器帮助
 func (s *XLFM) Help(detail bool) string {
 	var tip string

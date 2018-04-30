@@ -23,6 +23,11 @@ type Cnblogs struct {
 	client *util.Client
 }
 
+// EnableIncrement 是否支持增量下载
+func (s *Cnblogs) EnableIncrement() bool {
+	return true
+}
+
 // Help 输出帮忙内容
 func (s *Cnblogs) Help(detail bool) string {
 	var tip string

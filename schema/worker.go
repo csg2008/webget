@@ -11,6 +11,7 @@ type WorkerHandle func(client *util.Client) Worker
 
 // Worker 内容抓取工作者
 type Worker interface {
+	EnableIncrement() bool
 	Help(detail bool) string
 	Do(tryModel bool, entry string, fp *os.File) error
 }

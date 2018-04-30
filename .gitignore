@@ -8,4 +8,4 @@
 *.test
 .glide/
 
-bin/dnsproxy
+bin/*

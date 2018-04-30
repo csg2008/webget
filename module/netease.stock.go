@@ -19,6 +19,11 @@ type NeteaseStock struct {
 	client *util.Client
 }
 
+// EnableIncrement 是否支持增量下载
+func (s *NeteaseStock) EnableIncrement() bool {
+	return true
+}
+
 func (s *NeteaseStock) Help(detail bool) string {
 	var tip string
 

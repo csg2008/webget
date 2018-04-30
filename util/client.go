@@ -6,18 +6,26 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"golang.org/x/net/publicsuffix"
 )
 
 // NewClient new http client
 func NewClient() *Client {
+	var cookiejarOptions = cookiejar.Options{
+		PublicSuffixList: publicsuffix.List,
+	}
+	var jar, _ = cookiejar.New(&cookiejarOptions)
+
 	return &Client{
 		client: http.Client{
+			Jar:     jar,
 			Timeout: time.Second * 10,
 		},
 		transport: &http.Transport{
@@ -37,6 +45,8 @@ type ClientPayload struct {
 
 // Client http client
 type Client struct {
+	file      string
+	urls      []string
 	client    http.Client
 	transport *http.Transport
 }
@@ -50,7 +60,7 @@ func (c *Client) Read(url string, payload *ClientPayload) (*http.Response, error
 	}
 	if nil == payload.Header {
 		payload.Header = &http.Header{
-			"User-Agent": []string{"User-Agent:Mozilla/5.0(Macintosh;U;IntelMacOSX10_6_8;en-us)AppleWebKit/534.50(KHTML,likeGecko)Version/5.1Safari/534.50"},
+			"User-Agent": []string{"Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0"},
 		}
 	}
 
@@ -160,27 +170,42 @@ func (c *Client) GetCodec(url string, payload *ClientPayload, codec string, out 
 // Download 下载文件
 func (c *Client) Download(url string, filename string, auto bool) error {
 	var err error
+	var skip bool
 	var data []byte
 	var resp *http.Response
-	if data, resp, err = c.GetByte(url, nil); nil == err && 200 == resp.StatusCode {
-		if auto && "" == c.GetURLExt(filename) {
-			filename = filename + c.GetURLExt(resp.Request.URL.String())
-		}
 
-		filename = SafeFileName(filename)
-		var output, err = os.Create(filename)
-		if err != nil {
-			return err
+	for _, v := range c.urls {
+		if v == url {
+			skip = true
+			break
 		}
+	}
 
-		defer func() {
-			output.Close()
-			if nil != err {
-				os.Remove(filename)
+	if !skip {
+		if data, resp, err = c.GetByte(url, nil); nil == err && 200 == resp.StatusCode {
+			if auto && "" == c.GetURLExt(filename) {
+				filename = filename + c.GetURLExt(resp.Request.URL.String())
 			}
-		}()
 
-		_, err = output.Write(data)
+			filename = SafeFileName(filename)
+			var output, err = os.Create(filename)
+			if err != nil {
+				return err
+			}
+
+			defer func() {
+				output.Close()
+				if nil != err {
+					os.Remove(filename)
+				}
+			}()
+
+			_, err = output.Write(data)
+
+			if nil == err && nil != c.urls {
+				c.urls = append(c.urls, url)
+			}
+		}
 	}
 
 	return err
@@ -212,4 +237,38 @@ func (c *Client) GetURLFilename(url string) string {
 	}
 
 	return ext
+}
+
+//EnableIncrement 设置支持增量下载的状态存储文件
+func (c *Client) EnableIncrement(file string) {
+	if "" != file {
+		c.file = file
+		c.urls = make([]string, 0, 100)
+
+		if content, err := FileGetContents("file"); nil == err {
+			var s int
+			var t []byte
+			var l = len(content) - 1
+			for i, cc := range content {
+				if 13 == cc || i == l {
+					t = bytes.Trim(content[s:i], "\r\n\t ")
+
+					s = i + 1
+
+					if len(t) > 0 {
+						c.urls = append(c.urls, string(t))
+					}
+				}
+			}
+		}
+	}
+}
+
+// SaveIncrement 保存增量下载进度
+func (c *Client) SaveIncrement() {
+	if nil != c.urls && len(c.urls) > 0 {
+		var v = strings.Join(c.urls, "\n")
+
+		FilePutContents(c.file, []byte(v), false)
+	}
 }

@@ -67,6 +67,15 @@ func main() {
 	} else {
 		if w, ok := provider[*worker]; ok {
 			var wh = w(client)
+
+			if !*showHelp {
+				if wh.EnableIncrement() {
+					client.EnableIncrement(*worker)
+
+					defer client.SaveIncrement()
+				}
+			}
+
 			webget = schema.NewWebget(wh, version)
 			webget.Startup(*showHelp, *entry, *output)
 		} else {
