@@ -171,8 +171,6 @@ func (c *Client) GetCodec(url string, payload *ClientPayload, codec string, out 
 func (c *Client) Download(url string, filename string, auto bool) error {
 	var err error
 	var skip bool
-	var data []byte
-	var resp *http.Response
 
 	for _, v := range c.urls {
 		if v == url {
@@ -182,6 +180,9 @@ func (c *Client) Download(url string, filename string, auto bool) error {
 	}
 
 	if !skip {
+		var data []byte
+		var resp *http.Response
+
 		if data, resp, err = c.GetByte(url, nil); nil == err && 200 == resp.StatusCode {
 			if auto && "" == c.GetURLExt(filename) {
 				filename = filename + c.GetURLExt(resp.Request.URL.String())
@@ -245,17 +246,20 @@ func (c *Client) EnableIncrement(file string) {
 		c.file = file
 		c.urls = make([]string, 0, 100)
 
-		if content, err := FileGetContents("file"); nil == err {
+		if content, err := FileGetContents(c.file); nil == err {
 			var s int
 			var t []byte
 			var l = len(content) - 1
 			for i, cc := range content {
-				if 13 == cc || i == l {
-					t = bytes.Trim(content[s:i], "\r\n\t ")
+				if 10 == cc || i == l {
+					if i == l {
+						t = bytes.Trim(content[s:], "\r\n\t ")
+					} else {
+						t = bytes.Trim(content[s:i], "\r\n\t ")
+					}
 
 					s = i + 1
-
-					if len(t) > 0 {
+					if len(t) > 1 {
 						c.urls = append(c.urls, string(t))
 					}
 				}
