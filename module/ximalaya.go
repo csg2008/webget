@@ -56,6 +56,7 @@ func (s *XimalayaAlbum) Do(tryModel bool, entry string, fp *os.File) error {
 		return errors.New("声音专辑网址格式不对，正确的格式如：http://www.ximalaya.com/1000202/album/2667276/")
 	}
 
+	var cnt int
 	var url string
 	var flag bool
 	var files = util.GetDirFiles("./", true)
@@ -72,10 +73,16 @@ func (s *XimalayaAlbum) Do(tryModel bool, entry string, fp *os.File) error {
 
 			if !flag {
 				if url, err = s.getItemURL(item[1]); nil == err && "" != url {
-					s.client.Download(url, item[0], true)
+					if err = s.client.Download(url, item[0], true); nil != err {
+						cnt++
+					}
 				}
 			}
 		}
+	}
+
+	if cnt > 0 && nil == err {
+		err = errors.New("下载失败了 " + strconv.FormatInt(int64(cnt), 10) + " 个文件")
 	}
 
 	return err
