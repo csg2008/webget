@@ -13,5 +13,7 @@ type WorkerHandle func(client *util.Client) Worker
 type Worker interface {
 	EnableIncrement() bool
 	Help(detail bool) string
+	List() []map[string]string
+	Search(keyword string) []map[string]string
 	Do(tryModel bool, entry string, fp *os.File) error
 }

@@ -36,6 +36,16 @@ func (s *NeteaseStock) Help(detail bool) string {
 	return tip
 }
 
+// List 列出已经缓存的资源
+func (s *NeteaseStock) List() []map[string]string {
+	return nil
+}
+
+// Search 缓存搜索
+func (s *NeteaseStock) Search(keyword string) []map[string]string {
+	return nil
+}
+
 func (s *NeteaseStock) Do(tryModel bool, entry string, fp *os.File) error {
 	var url = "http://quotes.money.163.com/trade/lsjysj_300104.html"
 	var doc, err = s.client.GetDoc(url, nil)

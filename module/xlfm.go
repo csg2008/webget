@@ -42,6 +42,16 @@ func (s *XLFM) Help(detail bool) string {
 	return tip
 }
 
+// List 列出已经缓存的资源
+func (s *XLFM) List() []map[string]string {
+	return nil
+}
+
+// Search 缓存搜索
+func (s *XLFM) Search(keyword string) []map[string]string {
+	return nil
+}
+
 // Do 提取内容
 func (s *XLFM) Do(tryModel bool, entry string, fp *os.File) error {
 	if "" == entry {

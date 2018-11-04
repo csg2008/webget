@@ -43,6 +43,16 @@ func (s *Flysnow) Help(detail bool) string {
 	return tip
 }
 
+// List 列出已经缓存的资源
+func (s *Flysnow) List() []map[string]string {
+	return nil
+}
+
+// Search 缓存搜索
+func (s *Flysnow) Search(keyword string) []map[string]string {
+	return nil
+}
+
 // Do 提取内容
 func (s *Flysnow) Do(tryModel bool, entry string, fp *os.File) error {
 	if "" == entry {
