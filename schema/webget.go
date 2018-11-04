@@ -48,7 +48,8 @@ func (w *Webget) Cli(provider string, entry string, filename string, showHelp bo
 
 // Web 启动 HTTP 服务
 func (w *Webget) Web() {
-
+	var s = NewServer(":1104")
+	s.Start()
 }
 
 // Run 执行指定模块
