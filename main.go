@@ -48,6 +48,7 @@ func main() {
 			"xmly":          module.NewXimalayaAlbum,
 			"xlfm":          module.NewXLFM,
 			"lzfm":          module.NewLZFM,
+			"jd":            module.NewJD,
 		},
 	}
 

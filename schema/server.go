@@ -39,6 +39,7 @@ func (s *Server) Start() error {
 	mux.HandleFunc("/module.html", s.module)
 
 	s.server.Handler = mux
+	s.webget.Workers = make(map[string]Worker)
 
 	for k, v := range s.webget.Providers {
 		worker = v(s.webget.Client)
