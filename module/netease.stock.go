@@ -14,11 +14,13 @@ import (
 func NewNeteaseStock(client *util.Client) schema.Worker {
 	return &NeteaseStock{
 		client: client,
+		option: &schema.Option{Cli: true, Web: false, Task: false, Increment: true},
 	}
 }
 
 type NeteaseStock struct {
 	client *util.Client
+	option *schema.Option
 }
 
 // Intro 显示抓取器帮助
@@ -35,7 +37,7 @@ func (s *NeteaseStock) Intro(category string) string {
 
 // Options 抓取选项
 func (s *NeteaseStock) Options() *schema.Option {
-	return &schema.Option{Cli: true, Web: true, Task: false, Increment: true}
+	return s.option
 }
 
 // Task 后台任务
@@ -53,9 +55,9 @@ func (s *NeteaseStock) Search(keyword string) []map[string]string {
 	return nil
 }
 
-// Web 模块 web 入口
-func (s *NeteaseStock) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) {
-
+// Web 模块 web 入口, 返回 true 表示已经准备就绪
+func (s *NeteaseStock) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) bool {
+	return false
 }
 
 func (s *NeteaseStock) Do(tryModel bool, entry string, rule string, fp *os.File) error {

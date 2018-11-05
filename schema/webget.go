@@ -13,6 +13,7 @@ type Webget struct {
 	Started   int64                   `label:"程序启动时间"`
 	Client    *util.Client            `label:"HTTP 客户端"`
 	Version   map[string]string       `label:"应用版本信息"`
+	Workers   map[string]Worker       `label:"数据抓取器实例"`
 	Providers map[string]WorkerHandle `label:"数据服务提供者"`
 }
 
@@ -46,8 +47,8 @@ func (w *Webget) Cli(provider string, rule string, entry string, filename string
 }
 
 // Web 启动 HTTP 服务
-func (w *Webget) Web() {
-	var s = NewServer(w, ":1104")
+func (w *Webget) Web(listen string) {
+	var s = NewServer(w, listen)
 	s.Start()
 }
 

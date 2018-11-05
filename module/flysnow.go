@@ -19,12 +19,14 @@ import (
 func NewFlysnow(client *util.Client) schema.Worker {
 	return &Flysnow{
 		client: client,
+		option: &schema.Option{Cli: true, Web: false, Task: false, Increment: true},
 	}
 }
 
 // Flysnow 飞雪无情博客内容抓取器
 type Flysnow struct {
 	client *util.Client
+	option *schema.Option
 }
 
 // Intro 显示抓取器帮助
@@ -41,7 +43,7 @@ func (s *Flysnow) Intro(category string) string {
 
 // Options 抓取选项
 func (s *Flysnow) Options() *schema.Option {
-	return &schema.Option{Cli: true, Web: true, Task: false, Increment: true}
+	return s.option
 }
 
 // Task 后台任务
@@ -59,9 +61,9 @@ func (s *Flysnow) Search(keyword string) []map[string]string {
 	return nil
 }
 
-// Web 模块 web 入口
-func (s *Flysnow) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) {
-
+// Web 模块 web 入口, 返回 true 表示已经准备就绪
+func (s *Flysnow) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) bool {
+	return false
 }
 
 // Do 提取内容

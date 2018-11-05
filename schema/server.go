@@ -30,12 +30,28 @@ func NewServer(webget *Webget, addr string) *Server {
 
 // Start 启动服务器
 func (s *Server) Start() error {
+	var worker Worker
+	var option *Option
 	var mux = http.NewServeMux()
+
 	mux.HandleFunc("/", s.home)
 	mux.HandleFunc("/notify.html", s.notify)
 	mux.HandleFunc("/module.html", s.module)
 
 	s.server.Handler = mux
+
+	for k, v := range s.webget.Providers {
+		worker = v(s.webget.Client)
+		option = worker.Options()
+
+		if option.Web {
+			s.webget.Workers[k] = worker
+
+			if option.Task && option.AutoStart {
+				go s.webget.Workers[k].Task()
+			}
+		}
+	}
 
 	return s.server.ListenAndServe()
 }
@@ -47,13 +63,11 @@ func (s *Server) Stop() error {
 
 // home 爬虫首页
 func (s *Server) home(w http.ResponseWriter, req *http.Request) {
-	var worker Worker
 	var html = new(bytes.Buffer)
 
 	html.WriteString("<html><head><title>welcome use webget</title></head><body>")
 
-	for k, v := range s.webget.Providers {
-		worker = v(s.webget.Client)
+	for k, worker := range s.webget.Workers {
 		if worker.Options().Web {
 			html.WriteString("<div><a href='/module.html?m=")
 			html.WriteString(k)
@@ -82,20 +96,16 @@ func (s *Server) module(w http.ResponseWriter, req *http.Request) {
 
 	html.WriteString("<html><head><title>welcome use webget</title></head><body>")
 
-	if v, ok := s.webget.Providers[module]; ok {
-		var worker = v(s.webget.Client)
+	if worker, ok := s.webget.Workers[module]; ok {
+		var option = worker.Options()
 
-		if worker.Options().Web {
-			worker.Web(w, req, html)
-		} else {
-			html.WriteString("module [")
-			html.WriteString(module)
-			html.WriteString("] not support web")
+		if !worker.Web(w, req, html) && 0 == option.Status {
+			go worker.Task()
 		}
 	} else {
 		html.WriteString("module [")
 		html.WriteString(module)
-		html.WriteString("] not exists")
+		html.WriteString("] not exists or not support web ui")
 	}
 
 	html.WriteString("</body></html>")

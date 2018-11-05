@@ -17,12 +17,14 @@ import (
 func NewCnblogs(client *util.Client) schema.Worker {
 	return &Cnblogs{
 		client: client,
+		option: &schema.Option{Cli: true, Web: false, Task: false, Increment: true},
 	}
 }
 
 // Cnblogs 博客园内容抓取器
 type Cnblogs struct {
 	client *util.Client
+	option *schema.Option
 }
 
 // Intro 输出帮忙内容
@@ -39,7 +41,7 @@ func (s *Cnblogs) Intro(category string) string {
 
 // Options 抓取选项
 func (s *Cnblogs) Options() *schema.Option {
-	return &schema.Option{Cli: true, Web: true, Task: false, Increment: true}
+	return s.option
 }
 
 // Task 后台任务
@@ -57,9 +59,9 @@ func (s *Cnblogs) Search(keyword string) []map[string]string {
 	return nil
 }
 
-// Web 模块 web 入口
-func (s *Cnblogs) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) {
-
+// Web 模块 web 入口, 返回 true 表示已经准备就绪
+func (s *Cnblogs) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) bool {
+	return false
 }
 
 // Do 执行内容抓取

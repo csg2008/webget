@@ -18,12 +18,14 @@ import (
 func NewXLFM(client *util.Client) schema.Worker {
 	return &XLFM{
 		client: client,
+		option: &schema.Option{Cli: true, Web: false, Task: false, Increment: true},
 	}
 }
 
 // XLFM 心理 FM 专辑声音下载链接生成器
 type XLFM struct {
 	client *util.Client
+	option *schema.Option
 }
 
 // Intro 显示抓取器帮助
@@ -40,7 +42,7 @@ func (s *XLFM) Intro(category string) string {
 
 // Options 抓取选项
 func (s *XLFM) Options() *schema.Option {
-	return &schema.Option{Cli: true, Web: true, Task: false, Increment: true}
+	return s.option
 }
 
 // Task 后台任务
@@ -58,9 +60,9 @@ func (s *XLFM) Search(keyword string) []map[string]string {
 	return nil
 }
 
-// Web 模块 web 入口
-func (s *XLFM) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) {
-
+// Web 模块 web 入口, 返回 true 表示已经准备就绪
+func (s *XLFM) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) bool {
+	return false
 }
 
 // Do 提取内容
