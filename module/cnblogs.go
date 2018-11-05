@@ -23,11 +23,6 @@ type Cnblogs struct {
 	client *util.Client
 }
 
-// EnableIncrement 是否支持增量下载
-func (s *Cnblogs) EnableIncrement() bool {
-	return true
-}
-
 // Help 输出帮忙内容
 func (s *Cnblogs) Help(detail bool) string {
 	var tip string
@@ -41,6 +36,16 @@ func (s *Cnblogs) Help(detail bool) string {
 	return tip
 }
 
+// Options 抓取选项
+func (s *Cnblogs) Options() *schema.Option {
+	return &schema.Option{Cli: true, Web: true, Task: false, Increment: true}
+}
+
+// Task 后台任务
+func (s *Cnblogs) Task() error {
+	return nil
+}
+
 // List 列出已经缓存的资源
 func (s *Cnblogs) List() []map[string]string {
 	return nil
@@ -48,11 +53,11 @@ func (s *Cnblogs) List() []map[string]string {
 
 // Search 缓存搜索
 func (s *Cnblogs) Search(keyword string) []map[string]string {
-    return nil
+	return nil
 }
 
 // Do 执行内容抓取
-func (s *Cnblogs) Do(tryModel bool, entry string, fp *os.File) error {
+func (s *Cnblogs) Do(tryModel bool, entry string, rule string, fp *os.File) error {
 	if "" == entry {
 		if tryModel {
 			entry = "http://www.cnblogs.com/coderfenghc/default.html"

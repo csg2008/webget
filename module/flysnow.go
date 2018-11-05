@@ -25,11 +25,6 @@ type Flysnow struct {
 	client *util.Client
 }
 
-// EnableIncrement 是否支持增量下载
-func (s *Flysnow) EnableIncrement() bool {
-	return true
-}
-
 // Help 显示抓取器帮助
 func (s *Flysnow) Help(detail bool) string {
 	var tip string
@@ -43,6 +38,16 @@ func (s *Flysnow) Help(detail bool) string {
 	return tip
 }
 
+// Options 抓取选项
+func (s *Flysnow) Options() *schema.Option {
+	return &schema.Option{Cli: true, Web: true, Task: false, Increment: true}
+}
+
+// Task 后台任务
+func (s *Flysnow) Task() error {
+	return nil
+}
+
 // List 列出已经缓存的资源
 func (s *Flysnow) List() []map[string]string {
 	return nil
@@ -54,7 +59,7 @@ func (s *Flysnow) Search(keyword string) []map[string]string {
 }
 
 // Do 提取内容
-func (s *Flysnow) Do(tryModel bool, entry string, fp *os.File) error {
+func (s *Flysnow) Do(tryModel bool, entry string, rule string, fp *os.File) error {
 	if "" == entry {
 		if tryModel {
 			entry = "http://www.flysnow.org/categories/Golang/"

@@ -25,25 +25,24 @@ func (w *Webget) Help() {
 }
 
 // Cli 启动内容抓取工作
-func (w *Webget) Cli(provider string, entry string, filename string, showHelp bool, tryModel bool) {
+func (w *Webget) Cli(provider string, rule string, entry string, filename string, showHelp bool, tryModel bool) {
 	if wh, ok := w.Providers[provider]; ok {
 		var worker = wh(w.Client)
 
 		if showHelp {
 			worker.Help(showHelp)
 		} else {
-			if worker.EnableIncrement() {
+			if worker.Options().Increment {
 				w.Client.EnableIncrement(provider)
 
 				defer w.Client.SaveIncrement()
 			}
 
-			w.Run(worker, entry, filename, tryModel)
+			w.Run(worker, entry, rule, filename, tryModel)
 		}
 	} else {
 		fmt.Fprintln(os.Stderr, "未知的内容抓取模块 [", provider, "] 请使用 -h 参数获取帮助信息")
 	}
-
 }
 
 // Web 启动 HTTP 服务
@@ -53,7 +52,7 @@ func (w *Webget) Web() {
 }
 
 // Run 执行指定模块
-func (w *Webget) Run(worker Worker, entry string, filename string, tryModel bool) {
+func (w *Webget) Run(worker Worker, entry string, rule string, filename string, tryModel bool) {
 	var err error
 	var fp *os.File
 	if "" == filename {
@@ -65,7 +64,7 @@ func (w *Webget) Run(worker Worker, entry string, filename string, tryModel bool
 		}
 	}
 	if nil == err {
-		err = worker.Do(tryModel, entry, fp)
+		err = worker.Do(tryModel, entry, rule, fp)
 	}
 	if nil == err {
 		fmt.Println("内容抓取结束，谢谢使用")

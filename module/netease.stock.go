@@ -19,11 +19,6 @@ type NeteaseStock struct {
 	client *util.Client
 }
 
-// EnableIncrement 是否支持增量下载
-func (s *NeteaseStock) EnableIncrement() bool {
-	return true
-}
-
 func (s *NeteaseStock) Help(detail bool) string {
 	var tip string
 
@@ -36,6 +31,16 @@ func (s *NeteaseStock) Help(detail bool) string {
 	return tip
 }
 
+// Options 抓取选项
+func (s *NeteaseStock) Options() *schema.Option {
+	return &schema.Option{Cli: true, Web: true, Task: false, Increment: true}
+}
+
+// Task 后台任务
+func (s *NeteaseStock) Task() error {
+	return nil
+}
+
 // List 列出已经缓存的资源
 func (s *NeteaseStock) List() []map[string]string {
 	return nil
@@ -46,7 +51,7 @@ func (s *NeteaseStock) Search(keyword string) []map[string]string {
 	return nil
 }
 
-func (s *NeteaseStock) Do(tryModel bool, entry string, fp *os.File) error {
+func (s *NeteaseStock) Do(tryModel bool, entry string, rule string, fp *os.File) error {
 	var url = "http://quotes.money.163.com/trade/lsjysj_300104.html"
 	var doc, err = s.client.GetDoc(url, nil)
 	if nil == err {

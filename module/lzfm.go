@@ -24,11 +24,6 @@ type LZFM struct {
 	client *util.Client
 }
 
-// EnableIncrement 是否支持增量下载
-func (s *LZFM) EnableIncrement() bool {
-	return true
-}
-
 // Help 显示抓取器帮助
 func (s *LZFM) Help(detail bool) string {
 	var tip string
@@ -42,6 +37,16 @@ func (s *LZFM) Help(detail bool) string {
 	return tip
 }
 
+// Options 抓取选项
+func (s *LZFM) Options() *schema.Option {
+	return &schema.Option{Cli: true, Web: true, Task: false, Increment: true}
+}
+
+// Task 后台任务
+func (s *LZFM) Task() error {
+	return nil
+}
+
 // List 列出已经缓存的资源
 func (s *LZFM) List() []map[string]string {
 	return nil
@@ -53,7 +58,7 @@ func (s *LZFM) Search(keyword string) []map[string]string {
 }
 
 // Do 提取内容
-func (s *LZFM) Do(tryModel bool, entry string, fp *os.File) error {
+func (s *LZFM) Do(tryModel bool, entry string, rule string, fp *os.File) error {
 	if "" == entry {
 		if tryModel {
 			entry = "http://www.lizhi.fm/user/2544758401649219116"

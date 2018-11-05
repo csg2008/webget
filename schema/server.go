@@ -29,6 +29,7 @@ func NewServer(addr string) *Server {
 func (s *Server) Start() error {
 	var mux = http.NewServeMux()
 	mux.HandleFunc("/", s.home)
+	mux.HandleFunc("/notify.html", s.notify)
 
 	s.server.Handler = mux
 
@@ -45,4 +46,9 @@ func (s *Server) home(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write([]byte("webcome"))
+}
+
+// notify 接收消息通知
+func (s *Server) notify(w http.ResponseWriter, req *http.Request) {
+
 }

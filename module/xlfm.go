@@ -24,11 +24,6 @@ type XLFM struct {
 	client *util.Client
 }
 
-// EnableIncrement 是否支持增量下载
-func (s *XLFM) EnableIncrement() bool {
-	return true
-}
-
 // Help 显示抓取器帮助
 func (s *XLFM) Help(detail bool) string {
 	var tip string
@@ -42,6 +37,16 @@ func (s *XLFM) Help(detail bool) string {
 	return tip
 }
 
+// Options 抓取选项
+func (s *XLFM) Options() *schema.Option {
+	return &schema.Option{Cli: true, Web: true, Task: false, Increment: true}
+}
+
+// Task 后台任务
+func (s *XLFM) Task() error {
+	return nil
+}
+
 // List 列出已经缓存的资源
 func (s *XLFM) List() []map[string]string {
 	return nil
@@ -53,7 +58,7 @@ func (s *XLFM) Search(keyword string) []map[string]string {
 }
 
 // Do 提取内容
-func (s *XLFM) Do(tryModel bool, entry string, fp *os.File) error {
+func (s *XLFM) Do(tryModel bool, entry string, rule string, fp *os.File) error {
 	if "" == entry {
 		entry = "http://fm.xinli001.com/broadcast-list"
 	}

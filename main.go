@@ -22,6 +22,7 @@ func main() {
 	var entry = flag.String("e", "", "需要抓取的 URL 入口网址")
 	var output = flag.String("o", "", "抓取的内容输出文件，为空输出到控制台")
 	var worker = flag.String("w", "", "指定要执行的内容抓取模块名")
+	var rule = flag.String("r", "", "命令行模式抓取规则名")
 	var server = flag.Bool("s", false, "以 HTTP 服务的方式启动")
 	var debug = flag.Bool("d", false, "以调试模式运行")
 	var tryModel = flag.Bool("t", false, "使用模块默认参数试抓取")
@@ -82,6 +83,6 @@ func main() {
 	} else if "" == *worker {
 		flag.Usage()
 	} else {
-		webget.Cli(*worker, *entry, *output, *showHelp, *tryModel)
+		webget.Cli(*worker, *rule, *entry, *output, *showHelp, *tryModel)
 	}
 }
