@@ -1,8 +1,10 @@
 package module
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
@@ -25,14 +27,13 @@ type Flysnow struct {
 	client *util.Client
 }
 
-// Help 显示抓取器帮助
-func (s *Flysnow) Help(detail bool) string {
+// Intro 显示抓取器帮助
+func (s *Flysnow) Intro(category string) string {
 	var tip string
 
-	if detail {
-		tip = "飞雪无情个人博客内容抓取器"
-	} else {
-		tip = "飞雪无情个人博客内容抓取器"
+	switch category {
+	case "label":
+		tip = "飞雪无情博客"
 	}
 
 	return tip
@@ -56,6 +57,11 @@ func (s *Flysnow) List() []map[string]string {
 // Search 缓存搜索
 func (s *Flysnow) Search(keyword string) []map[string]string {
 	return nil
+}
+
+// Web 模块 web 入口
+func (s *Flysnow) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) {
+
 }
 
 // Do 提取内容

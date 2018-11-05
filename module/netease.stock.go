@@ -1,7 +1,9 @@
 package module
 
 import (
+	"bytes"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
@@ -19,13 +21,13 @@ type NeteaseStock struct {
 	client *util.Client
 }
 
-func (s *NeteaseStock) Help(detail bool) string {
+// Intro 显示抓取器帮助
+func (s *NeteaseStock) Intro(category string) string {
 	var tip string
 
-	if detail {
-		tip = ""
-	} else {
-		tip = "网易股票抓取器"
+	switch category {
+	case "label":
+		tip = "网易股票"
 	}
 
 	return tip
@@ -49,6 +51,11 @@ func (s *NeteaseStock) List() []map[string]string {
 // Search 缓存搜索
 func (s *NeteaseStock) Search(keyword string) []map[string]string {
 	return nil
+}
+
+// Web 模块 web 入口
+func (s *NeteaseStock) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) {
+
 }
 
 func (s *NeteaseStock) Do(tryModel bool, entry string, rule string, fp *os.File) error {

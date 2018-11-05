@@ -1,18 +1,21 @@
 package schema
 
 import (
+	"bytes"
 	"net/http"
 	"time"
 )
 
 // Server http base spider web ui
 type Server struct {
+	webget *Webget
 	server *http.Server
 }
 
 // NewServer new a http server
-func NewServer(addr string) *Server {
+func NewServer(webget *Webget, addr string) *Server {
 	var ns = &Server{
+		webget: webget,
 		server: &http.Server{
 			Addr:           addr,
 			Handler:        http.DefaultServeMux,
@@ -30,6 +33,7 @@ func (s *Server) Start() error {
 	var mux = http.NewServeMux()
 	mux.HandleFunc("/", s.home)
 	mux.HandleFunc("/notify.html", s.notify)
+	mux.HandleFunc("/module.html", s.module)
 
 	s.server.Handler = mux
 
@@ -43,12 +47,60 @@ func (s *Server) Stop() error {
 
 // home 爬虫首页
 func (s *Server) home(w http.ResponseWriter, req *http.Request) {
+	var worker Worker
+	var html = new(bytes.Buffer)
+
+	html.WriteString("<html><head><title>welcome use webget</title></head><body>")
+
+	for k, v := range s.webget.Providers {
+		worker = v(s.webget.Client)
+		if worker.Options().Web {
+			html.WriteString("<div><a href='/module.html?m=")
+			html.WriteString(k)
+			html.WriteString("'>")
+			html.WriteString(worker.Intro("label"))
+			html.WriteString("</a></div>")
+		}
+	}
+
+	html.WriteString("</body></html>")
+
 	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write([]byte("webcome"))
+	w.Write(html.Bytes())
 }
 
 // notify 接收消息通知
 func (s *Server) notify(w http.ResponseWriter, req *http.Request) {
 
+}
+
+// module 处理模块请求
+func (s *Server) module(w http.ResponseWriter, req *http.Request) {
+	var html = new(bytes.Buffer)
+	var module = req.URL.Query().Get("m")
+
+	html.WriteString("<html><head><title>welcome use webget</title></head><body>")
+
+	if v, ok := s.webget.Providers[module]; ok {
+		var worker = v(s.webget.Client)
+
+		if worker.Options().Web {
+			worker.Web(w, req, html)
+		} else {
+			html.WriteString("module [")
+			html.WriteString(module)
+			html.WriteString("] not support web")
+		}
+	} else {
+		html.WriteString("module [")
+		html.WriteString(module)
+		html.WriteString("] not exists")
+	}
+
+	html.WriteString("</body></html>")
+
+	w.WriteHeader(200)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write(html.Bytes())
 }

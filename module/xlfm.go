@@ -1,7 +1,9 @@
 package module
 
 import (
+	"bytes"
 	"errors"
+	"net/http"
 	"net/url"
 	"os"
 	"strconv"
@@ -24,14 +26,13 @@ type XLFM struct {
 	client *util.Client
 }
 
-// Help 显示抓取器帮助
-func (s *XLFM) Help(detail bool) string {
+// Intro 显示抓取器帮助
+func (s *XLFM) Intro(category string) string {
 	var tip string
 
-	if detail {
-		tip = "心理FM 专辑下载器"
-	} else {
-		tip = "心理FM 专辑下载器"
+	switch category {
+	case "label":
+		tip = "心理 FM"
 	}
 
 	return tip
@@ -55,6 +56,11 @@ func (s *XLFM) List() []map[string]string {
 // Search 缓存搜索
 func (s *XLFM) Search(keyword string) []map[string]string {
 	return nil
+}
+
+// Web 模块 web 入口
+func (s *XLFM) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) {
+
 }
 
 // Do 提取内容

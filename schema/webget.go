@@ -20,7 +20,7 @@ type Webget struct {
 func (w *Webget) Help() {
 	for k, wh := range w.Providers {
 		var wh = wh(w.Client)
-		fmt.Fprintln(os.Stderr, "        ", k, " ", wh.Help(false))
+		fmt.Fprintln(os.Stderr, "        ", k, " ", wh.Intro("label"))
 	}
 }
 
@@ -30,7 +30,7 @@ func (w *Webget) Cli(provider string, rule string, entry string, filename string
 		var worker = wh(w.Client)
 
 		if showHelp {
-			worker.Help(showHelp)
+			worker.Intro("cliHelp")
 		} else {
 			if worker.Options().Increment {
 				w.Client.EnableIncrement(provider)
@@ -47,7 +47,7 @@ func (w *Webget) Cli(provider string, rule string, entry string, filename string
 
 // Web 启动 HTTP 服务
 func (w *Webget) Web() {
-	var s = NewServer(":1104")
+	var s = NewServer(w, ":1104")
 	s.Start()
 }
 

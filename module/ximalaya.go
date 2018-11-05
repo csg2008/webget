@@ -1,7 +1,9 @@
 package module
 
 import (
+	"bytes"
 	"errors"
+	"net/http"
 	"os"
 	"regexp"
 	"strconv"
@@ -24,14 +26,13 @@ type XimalayaAlbum struct {
 	client *util.Client
 }
 
-// Help 显示抓取器帮助
-func (s *XimalayaAlbum) Help(detail bool) string {
+// Intro 显示抓取器帮助
+func (s *XimalayaAlbum) Intro(category string) string {
 	var tip string
 
-	if detail {
-		tip = "喜马拉雅 FM 专辑声音下载链接生成器"
-	} else {
-		tip = "喜马拉雅 FM 专辑声音下载链接生成器"
+	switch category {
+	case "label":
+		tip = "喜马拉雅 FM"
 	}
 
 	return tip
@@ -55,6 +56,11 @@ func (s *XimalayaAlbum) List() []map[string]string {
 // Search 缓存搜索
 func (s *XimalayaAlbum) Search(keyword string) []map[string]string {
 	return nil
+}
+
+// Web 模块 web 入口
+func (s *XimalayaAlbum) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) {
+
 }
 
 // Do 提取内容

@@ -1,8 +1,10 @@
 package module
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
@@ -23,14 +25,13 @@ type Cnblogs struct {
 	client *util.Client
 }
 
-// Help 输出帮忙内容
-func (s *Cnblogs) Help(detail bool) string {
+// Intro 输出帮忙内容
+func (s *Cnblogs) Intro(category string) string {
 	var tip string
 
-	if detail {
-		tip = "博客园内容抓取器"
-	} else {
-		tip = "博客园内容抓取器"
+	switch category {
+	case "label":
+		tip = "博客园"
 	}
 
 	return tip
@@ -54,6 +55,11 @@ func (s *Cnblogs) List() []map[string]string {
 // Search 缓存搜索
 func (s *Cnblogs) Search(keyword string) []map[string]string {
 	return nil
+}
+
+// Web 模块 web 入口
+func (s *Cnblogs) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) {
+
 }
 
 // Do 执行内容抓取

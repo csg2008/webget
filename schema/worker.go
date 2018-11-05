@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"bytes"
+	"net/http"
 	"os"
 
 	"github.com/csg2008/webget/util"
@@ -21,8 +23,9 @@ type Option struct {
 type Worker interface {
 	Task() error
 	Options() *Option
-	Help(detail bool) string
+	Intro(category string) string
 	List() []map[string]string
 	Search(keyword string) []map[string]string
+	Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer)
 	Do(tryModel bool, entry string, rule string, fp *os.File) error
 }
