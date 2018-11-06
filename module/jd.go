@@ -29,11 +29,34 @@ type JDGoods struct {
 	CategoryId   string `json:"categoryId" label:"品类ID"`
 	Category     string `json:"category" label:"品类名称"`
 	WName        string `json:"wname" label:"商品名称"`
-	WareId       string `json:"wateId" label:"商品ID"`
-	MiaoShaPrice string `json:"categoryId" label:"秒杀价"`
+	WareId       string `json:"wareId" label:"商品ID"`
+	MiaoShaPrice string `json:"miaoShaPrice" label:"秒杀价"`
 	ImageURL     string `json:"imageurl" label:"图片网址"`
 }
 
+// Search 商品搜索
+func (g *JDGoods) Search(keyword ...string) bool {
+	var flag bool
+	var word string
+	var idx int
+	var cnt = len(keyword)
+
+	if cnt > 0 {
+		for _, word = range keyword {
+			if -1 != strings.Index(g.WName, word) {
+				idx++
+			}
+		}
+
+		if idx == cnt {
+			flag = true
+		}
+	}
+
+	return flag
+}
+
+// JDSnapshot 缓存数据快照
 type JDSnapshot struct {
 	Ts    int64     `json:"ts" label:"同步时间"`
 	Goods []JDGoods `json:"goods" label:"商品列表"`
@@ -117,9 +140,53 @@ func (s *JD) Search(keyword string) []map[string]string {
 	return nil
 }
 
+// SearchWeb 返回 HTML 形式的搜索结果
+func (s *JD) SearchWeb(keyword string) string {
+	var goods JDGoods
+	var buffer = new(strings.Builder)
+	var keys = strings.Split(keyword, " ")
+
+	s.option.Mux.RLock()
+
+	if nil != s.data && len(s.data.Goods) > 0 {
+		for _, goods = range s.data.Goods {
+			if goods.Search(keys...) {
+				buffer.WriteString("<div class = 'goods' style='height: 100px; width: 700px;overflow: hidden;'><a href='https://item.jd.com/")
+				buffer.WriteString(goods.WareId)
+				buffer.WriteString(".html'><img style='float: left;display: block;width:100px;height:100px;overflow:hidden;' src='")
+				buffer.WriteString(goods.ImageURL)
+				buffer.WriteString("'><div style='float: left;margin-left: 10px;height: 100px; width: 550px; overflow: hidden;'>￥ ")
+				buffer.WriteString(goods.MiaoShaPrice)
+				buffer.WriteString("<br />")
+				buffer.WriteString(goods.WName)
+				buffer.WriteString("</div><div style='clean:both;'></div></a></div>")
+			}
+		}
+	}
+
+	s.option.Mux.RUnlock()
+
+	return buffer.String()
+}
+
 // Web 模块 web 入口, 返回 true 表示已经准备就绪
 func (s *JD) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) bool {
-	return false
+	var status bool
+	var q = req.FormValue("q")
+
+	buf.WriteString("<form method='post' action='")
+	buf.WriteString(req.URL.String())
+	buf.WriteString("'><input type='text' id='q' name='q' value='")
+	buf.WriteString(q)
+	buf.WriteString("' style='width:450px;' /><input type='submit' value='search' /></form>")
+
+	var result = s.SearchWeb(q)
+	if "" != result {
+		status = true
+		buf.WriteString(result)
+	}
+
+	return status
 }
 
 // Do 提取内容
@@ -243,6 +310,10 @@ func (s *JD) toString(in interface{}) string {
 		ret = strconv.FormatUint(v, 10)
 	} else if v, ok := in.(int64); ok {
 		ret = strconv.FormatInt(v, 10)
+	} else if v, ok := in.(float64); ok {
+		ret = strconv.FormatFloat(v, 'f', 0, 64)
+	} else if v, ok := in.(float32); ok {
+		ret = strconv.FormatFloat(float64(v), 'f', 0, 32)
 	}
 
 	return ret
