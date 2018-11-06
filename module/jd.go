@@ -151,7 +151,7 @@ func (s *JD) SearchWeb(keyword string) string {
 	if nil != s.data && len(s.data.Goods) > 0 {
 		for _, goods = range s.data.Goods {
 			if goods.Search(keys...) {
-				buffer.WriteString("<div class = 'goods' style='height: 100px; width: 700px;overflow: hidden;'><a href='https://item.jd.com/")
+				buffer.WriteString("<div class = 'goods' style='height: 100px; width: 700px;overflow: hidden;'><a target='_blank' href='https://item.jd.com/")
 				buffer.WriteString(goods.WareId)
 				buffer.WriteString(".html'><img style='float: left;display: block;width:100px;height:100px;overflow:hidden;' src='")
 				buffer.WriteString(goods.ImageURL)
