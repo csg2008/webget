@@ -100,7 +100,7 @@ func (s *Server) module(w http.ResponseWriter, req *http.Request) {
 	if worker, ok := s.webget.Workers[module]; ok {
 		var option = worker.Options()
 
-		if !worker.Web(w, req, html) && 0 == option.Status {
+		if !worker.Web(w, req, html) && WorkerStatusNone == option.Status {
 			go worker.Task()
 		}
 	} else {

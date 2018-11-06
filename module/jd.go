@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/csg2008/webget/schema"
@@ -19,7 +20,7 @@ import (
 func NewJD(client *util.Client) schema.Worker {
 	return &JD{
 		client: client,
-		option: &schema.Option{Cli: true, Web: true, Task: false, Increment: true},
+		option: &schema.Option{Cli: true, Web: true, Task: true, AutoStart: true, Increment: false, Mux: new(sync.RWMutex)},
 	}
 }
 
@@ -64,18 +65,44 @@ func (s *JD) Options() *schema.Option {
 
 // Task 后台任务
 func (s *JD) Task() error {
+	var ts string
+	var flag bool
+	var cur = time.Now().Format("2006-01-02")
+
+	s.option.Mux.RLock()
+	if nil != s.data {
+		ts = time.Unix(s.data.Ts, 0).Format("2006-01-02")
+		if ts == cur && schema.WorkerStatusComplete == s.option.Status {
+			flag = true
+		}
+	}
+
+	s.option.Mux.RUnlock()
+
+	if flag {
+		return nil
+	}
+
+	s.option.Mux.Lock()
+
 	var data, err = util.FileGetContents("jd.json")
 	if nil == err && nil != data {
 		var snapshot = new(JDSnapshot)
 		if err = json.Unmarshal(data, snapshot); nil == err {
-			var ts = time.Unix(snapshot.Ts, 0).Format("2006-01-02")
-
-			if ts == time.Now().Format("2006-01-02") {
+			ts = time.Unix(snapshot.Ts, 0).Format("2006-01-02")
+			if ts == cur {
+				flag = true
 				s.data = snapshot
-				s.option.Status = 1
+				s.option.Status = schema.WorkerStatusComplete
 			}
 		}
 	}
+
+	if !flag {
+		err = s.Do(true, "", "", nil)
+	}
+
+	s.option.Mux.Unlock()
 
 	return err
 }
