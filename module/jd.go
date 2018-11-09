@@ -90,11 +90,11 @@ func (s *JD) Options() *schema.Option {
 func (s *JD) Task() error {
 	var ts string
 	var flag bool
-	var cur = time.Now().Format("2006-01-02")
+	var cur = time.Now().Format("2006010215")
 
 	s.option.Mux.RLock()
 	if nil != s.data {
-		ts = time.Unix(s.data.Ts, 0).Format("2006-01-02")
+		ts = time.Unix(s.data.Ts, 0).Format("2006010215")
 		if ts == cur && schema.WorkerStatusComplete == s.option.Status {
 			flag = true
 		}
@@ -112,7 +112,7 @@ func (s *JD) Task() error {
 	if nil == err && nil != data {
 		var snapshot = new(JDSnapshot)
 		if err = json.Unmarshal(data, snapshot); nil == err {
-			ts = time.Unix(snapshot.Ts, 0).Format("2006-01-02")
+			ts = time.Unix(snapshot.Ts, 0).Format("2006010215")
 			if ts == cur {
 				flag = true
 				s.data = snapshot
