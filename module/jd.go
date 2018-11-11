@@ -180,10 +180,14 @@ func (s *JD) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) bo
 	buf.WriteString(q)
 	buf.WriteString("' style='width:450px;' /><input type='submit' value='search' /></form>")
 
-	var result = s.SearchWeb(q)
-	if "" != result {
-		status = true
-		buf.WriteString(result)
+	if "" == q {
+		buf.WriteString("请输入要搜索的内容")
+	} else {
+		var result = s.SearchWeb(q)
+		if "" != result {
+			status = true
+			buf.WriteString(result)
+		}
 	}
 
 	return status
