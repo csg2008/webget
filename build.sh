@@ -9,4 +9,4 @@ GITBRANCH=$(git branch | awk '{print $NF}')
 GITLOGREV=$(git log -1 | grep commit | head -n 1 | awk '{print $NF}')
 builddate=$(date "+%Y%m%d%H%M%S")
 
-go build -ldflags "-X main.appName=${APPNAME} -X main.buildVersion=${VERSION} -X main.buildDate=${builddate} -X main.buildRev=${GITBRANCH}.${GITLOGREV}.${GOVER}" -o ./bin/${APPNAME}${APPEXT} .
+go build -ldflags "-s -w -X main.appName=${APPNAME} -X main.buildVersion=${VERSION} -X main.buildDate=${builddate} -X main.buildRev=${GITBRANCH}.${GITLOGREV}.${GOVER}" -o ./bin/${APPNAME}${APPEXT} .
