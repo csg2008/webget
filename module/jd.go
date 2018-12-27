@@ -64,9 +64,10 @@ type JDSnapshot struct {
 
 // JD 京东商城数据抓取器
 type JD struct {
-	data   *JDSnapshot
-	client *util.Client
-	option *schema.Option
+	Status int            `json:"status" label:"程序状态, 0 未初始化 1 正常 2 下载数据中"`
+	data   *JDSnapshot    `json:"data" label:"秒杀数据快照"`
+	client *util.Client   `json:"client" label:"http 客户端"`
+	option *schema.Option `json:"option" label:"程序运行时选项"`
 }
 
 // Intro 显示抓取器帮助
@@ -122,7 +123,14 @@ func (s *JD) Task() error {
 	}
 
 	if !flag {
+		s.Status = 2
 		err = s.Do(true, "", "", nil)
+	} else {
+		if len(s.data.Goods) > 0 {
+			s.Status = 1
+		} else {
+			s.Status = 0
+		}
 	}
 
 	s.option.Mux.Unlock()
@@ -174,11 +182,19 @@ func (s *JD) Web(w http.ResponseWriter, req *http.Request, buf *bytes.Buffer) bo
 	var status bool
 	var q = req.FormValue("q")
 
-	buf.WriteString("<form method='post' action='")
-	buf.WriteString(req.URL.String())
-	buf.WriteString("'><input type='text' id='q' name='q' value='")
-	buf.WriteString(q)
-	buf.WriteString("' style='width:450px;' /><input type='submit' value='search' /></form>")
+	if 1 == s.Status {
+		buf.WriteString("<script>function checkform(){var qs=document.getElementById('q');if (qs.value.length<1){alert('请输入要搜索的关键词，多个关键词之间用空格隔开');return false;}}</script>")
+		buf.WriteString("<form method='post' action='")
+		buf.WriteString(req.URL.String())
+		buf.WriteString("'><input type='text' id='q' name='q' value='")
+		buf.WriteString(q)
+		buf.WriteString("' style='width:450px;' />")
+		buf.WriteString("<input type='submit' value='search' onClick='javascript:checkform();' />")
+		buf.WriteString("</form>")
+	} else {
+		buf.WriteString("正在更新数据，请稍候……")
+		buf.WriteString("<script>setInterval(location.reload(), 1000);</script>")
+	}
 
 	if "" == q {
 		buf.WriteString("请输入要搜索的内容")
